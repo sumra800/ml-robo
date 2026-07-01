@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: waste-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - WASTE_MODEL_PATH=/app/models/best.pt
+      - WASTE_MODEL_URL=${WASTE_MODEL_URL-}
+      - WASTE_CONF_THRESHOLD=${WASTE_CONF_THRESHOLD-0.25}
+      - WASTE_BOOTSTRAP_MODEL=${WASTE_BOOTSTRAP_MODEL-yolov8n.pt}
+    volumes:
+      - ./models:/app/models
+      - ./runs:/app/runs
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: waste-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
